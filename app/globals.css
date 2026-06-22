@@ -1,0 +1,30 @@
+:root {
+  --bg: #0a0e14;
+  --text: #e6edf6;
+  --muted: #8a97a8;
+  --accent: #4f9dff;
+  --border: #1c2430;
+  --panel: #0f141d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
