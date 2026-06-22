@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getEntitlement } from '@/lib/engine';
 
 export const dynamic = 'force-dynamic';
@@ -84,7 +85,8 @@ export default async function Home() {
           n={2}
           done={false}
           title="Connect your stack"
-          body="Bring your own keys for the tools you use — HubSpot, Slack, Teams, Google or Microsoft, and more. Credentials stay here, encrypted, with you."
+          body="Bring your own keys for the tools you use — HubSpot, Slack, Teams, Google or Microsoft, and more. Credentials stay here, with you."
+          action={connected ? { href: '/marketplace', label: 'Open the marketplace →' } : undefined}
         />
         <Step
           n={3}
@@ -102,7 +104,19 @@ export default async function Home() {
   );
 }
 
-function Step({ n, done, title, body }: { n: number; done: boolean; title: string; body: string }) {
+function Step({
+  n,
+  done,
+  title,
+  body,
+  action,
+}: {
+  n: number;
+  done: boolean;
+  title: string;
+  body: string;
+  action?: { href: string; label: string };
+}) {
   return (
     <li
       style={{
@@ -134,6 +148,24 @@ function Step({ n, done, title, body }: { n: number; done: boolean; title: strin
       <div>
         <div style={{ fontWeight: 500, marginBottom: 4 }}>{title}</div>
         <div style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.55 }}>{body}</div>
+        {action && (
+          <Link
+            href={action.href}
+            style={{
+              display: 'inline-block',
+              marginTop: 12,
+              borderRadius: 8,
+              padding: '7px 14px',
+              fontSize: 13,
+              fontWeight: 500,
+              background: '#fff',
+              color: '#000',
+              textDecoration: 'none',
+            }}
+          >
+            {action.label}
+          </Link>
+        )}
       </div>
     </li>
   );
