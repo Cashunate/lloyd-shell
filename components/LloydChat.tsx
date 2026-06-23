@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Marketplace } from './Marketplace';
 import type { CatalogConnector } from '@/lib/engine';
+
+// The real Lloyd orb (R3F particle cloud) — client-only, no logo for customers.
+const LloydOrb = dynamic(() => import('./LloydOrb').then((m) => m.LloydOrb), { ssr: false });
 
 interface Msg {
   role: 'user' | 'assistant';
@@ -100,16 +104,9 @@ export function LloydChat({ connectors }: { connectors: CatalogConnector[] }) {
           borderBottom: '1px solid var(--border)',
         }}
       >
-        <span
-          style={{
-            height: 22,
-            width: 22,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle at 30% 30%, #7fc8ff, #2f6fe0 55%, #16204a)',
-            boxShadow: busy ? '0 0 14px 2px rgba(79,157,255,0.6)' : 'none',
-            transition: 'box-shadow 0.4s',
-          }}
-        />
+        <div style={{ height: 52, width: 52, position: 'relative', flexShrink: 0 }}>
+          <LloydOrb state={busy ? 'thinking' : 'idle'} showLogo={false} />
+        </div>
         <span style={{ fontSize: 17, fontWeight: 600 }}>Lloyd</span>
         <span style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
           <button onClick={() => setKeyPanel(true)} style={ghostBtn}>
