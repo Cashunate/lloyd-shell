@@ -70,6 +70,29 @@ export default async function Home() {
         {ent.keyHint ? <span style={{ color: 'var(--muted)' }}>  ·  {ent.keyHint}</span> : null}
       </span>
 
+      {connected && (
+        <div style={{ margin: '4px 0 32px' }}>
+          <Link
+            href="/lloyd"
+            style={{
+              display: 'inline-block',
+              borderRadius: 999,
+              padding: '12px 26px',
+              background: '#fff',
+              color: '#000',
+              fontSize: 15,
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
+          >
+            Talk to Lloyd →
+          </Link>
+          <span style={{ color: 'var(--muted)', fontSize: 13, marginLeft: 14 }}>
+            He’ll help you get set up.
+          </span>
+        </div>
+      )}
+
       <ol style={{ listStyle: 'none', padding: 0, margin: '8px 0 0', display: 'grid', gap: 12 }}>
         <Step
           n={1}
