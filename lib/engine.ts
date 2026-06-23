@@ -95,3 +95,52 @@ export interface CatalogConnector {
   credentials: CatalogCredential[];
   built: boolean;
 }
+
+export interface Connection {
+  connectorId: string;
+  name: string;
+  category?: string;
+  kind: string;
+  built: boolean;
+  envVars: string[];
+  connectedAt: string;
+}
+
+export interface Usage {
+  periodMonth: string;
+  tokensIn: number;
+  tokensOut: number;
+  webSearches: number;
+  integrationCalls: number;
+  costCents: number;
+  capCents: number;
+  overageCents: number;
+  withinCap: boolean;
+  byIntegration: Record<string, number>;
+}
+
+async function engineGet<T>(path: string): Promise<T | null> {
+  const key = process.env.LLOYD_ENTITLEMENT_KEY?.trim();
+  if (!key) return null;
+  try {
+    const res = await fetch(`${ENGINE_URL}${path}`, {
+      headers: { authorization: `Bearer ${key}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+/** This tenant's live integrations (server-side; entitlement key stays here). */
+export async function getConnections(): Promise<Connection[]> {
+  const data = await engineGet<{ connections?: Connection[] }>('/api/connections');
+  return data?.connections ?? [];
+}
+
+/** This tenant's current-period usage + spend. */
+export async function getUsage(): Promise<Usage | null> {
+  return engineGet<Usage>('/api/usage');
+}

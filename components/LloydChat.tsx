@@ -109,6 +109,9 @@ export function LloydChat({ connectors }: { connectors: CatalogConnector[] }) {
         </div>
         <span style={{ fontSize: 17, fontWeight: 600 }}>Lloyd</span>
         <span style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          <a href="/usage" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-block' }}>
+            Usage
+          </a>
           <button onClick={() => setKeyPanel(true)} style={ghostBtn}>
             {hasKey ? '● Your key' : 'Model key'}
           </button>

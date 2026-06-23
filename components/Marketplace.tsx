@@ -19,20 +19,58 @@ export function Marketplace({ connectors }: { connectors: CatalogConnector[] }) 
   const [active, setActive] = useState<CatalogConnector | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (raw) setConnected(JSON.parse(raw));
-    } catch {
-      /* ignore */
-    }
+    // Prefer the real per-tenant connections from the engine; fall back to the
+    // local cache if it can't be reached.
+    (async () => {
+      try {
+        const res = await fetch('/api/connections');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.connections)) {
+            setConnected(data.connections.map((c: { connectorId: string }) => c.connectorId));
+            return;
+          }
+        }
+      } catch {
+        /* fall back */
+      }
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (raw) setConnected(JSON.parse(raw));
+      } catch {
+        /* ignore */
+      }
+    })();
   }, []);
 
-  function persist(next: string[]) {
+  function cache(next: string[]) {
     setConnected(next);
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(next));
     } catch {
       /* ignore */
+    }
+  }
+
+  async function doConnect(connectorId: string, values: Record<string, string>) {
+    cache([...connected.filter((id) => id !== connectorId), connectorId]);
+    try {
+      await fetch('/api/connections', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ connectorId, values }),
+      });
+    } catch {
+      /* optimistic — cached locally */
+    }
+  }
+
+  async function doDisconnect(connectorId: string) {
+    cache(connected.filter((id) => id !== connectorId));
+    try {
+      await fetch(`/api/connections?id=${encodeURIComponent(connectorId)}`, { method: 'DELETE' });
+    } catch {
+      /* optimistic */
     }
   }
 
@@ -173,12 +211,12 @@ export function Marketplace({ connectors }: { connectors: CatalogConnector[] }) 
           connector={active}
           connected={connected.includes(active.id)}
           onClose={() => setActive(null)}
-          onConnect={() => {
-            if (!connected.includes(active.id)) persist([...connected, active.id]);
+          onConnect={(values) => {
+            void doConnect(active.id, values);
             setActive(null);
           }}
           onDisconnect={() => {
-            persist(connected.filter((id) => id !== active.id));
+            void doDisconnect(active.id);
             setActive(null);
           }}
         />
@@ -197,7 +235,7 @@ function ConnectModal({
   connector: CatalogConnector;
   connected: boolean;
   onClose: () => void;
-  onConnect: () => void;
+  onConnect: (values: Record<string, string>) => void;
   onDisconnect: () => void;
 }) {
   const [values, setValues] = useState<Record<string, string>>({});
@@ -301,7 +339,7 @@ function ConnectModal({
             </button>
           ) : null}
           <button
-            onClick={onConnect}
+            onClick={() => onConnect(values)}
             disabled={!ready}
             style={{
               flex: 2,
